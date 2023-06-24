@@ -23,6 +23,7 @@ const Home: NextPage = () => {
               <button className="btn">Sign in</button>
             </SignInButton>
           )}
+
           {!!user && (
             <SignOutButton>
               <button className="h-4 w-8 border-t-neutral-50 bg-red-200">
