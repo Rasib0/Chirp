@@ -7,6 +7,10 @@ import { api } from "~/utils/api";
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
+  const { data } = api.posts.getAll.useQuery();
+
+  console.log("What am I?", data);
+
   const user = useUser();
 
   return (
@@ -18,23 +22,27 @@ const Home: NextPage = () => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          {!user && (
+          {!user.isSignedIn && (
             <SignInButton mode="modal">
               <button className="btn">Sign in</button>
             </SignInButton>
           )}
 
-          {!!user && (
+          {!!user.isSignedIn && (
             <SignOutButton>
-              <button className="h-4 w-8 border-t-neutral-50 bg-red-200">
-                Sign out
-              </button>
+              <button className="h-4 w-8">Sign out</button>
             </SignOutButton>
           )}
 
           <p className="text-2xl text-white">
             {hello.data ? hello.data.greeting : "Loading tRPC query..."}
           </p>
+
+          <article>
+            {data?.map((post) => (
+              <div key={post.id}>{post.content}</div>
+            ))}
+          </article>
         </div>
       </main>
     </>
