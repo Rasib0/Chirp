@@ -36,7 +36,7 @@ export const postRouter = createTRPCRouter({
   //   return ctx.prisma.post.findMany();
   // }),
   create: privateProcedure
-    .input(z.object({ content: z.string().emoji().min(1).max(200) }))
+    .input(z.object({ content: z.string().emoji("Only emojis are allowed!").min(1).max(200) }))
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
 

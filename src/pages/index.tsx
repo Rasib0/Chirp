@@ -8,6 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -22,6 +23,15 @@ const CreatePostWizard = () => {
     onSuccess: () => {
       setInput("");
       void ctx.posts.getAll.invalidate();
+    },
+    onError: (err) => {
+      const errorMessage = err.data?.zodError?.fieldErrors?.content;
+
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Please try again later.");
+      }
     },
   });
 
@@ -41,9 +51,22 @@ const CreatePostWizard = () => {
         placeholder="Type some emojis!"
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        // submit on enter
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            mutate({ content: input });
+          }
+        }}
         disabled={isPosting}
       />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      {input !== "" && !isPosting && (
+        <button onClick={() => mutate({ content: input })}>Post</button>
+      )}
+      {isPosting && (
+        <div className="flex items-center justify-center">
+          <LoadingSpinner size={20} />
+        </div>
+      )}
     </div>
   );
 };
