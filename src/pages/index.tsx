@@ -1,12 +1,12 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { type RouterOutputs, api } from "~/utils/api";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
@@ -58,18 +58,31 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
-const Home: NextPage = () => {
-  //const hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const { data, isLoading } = api.posts.getAll.useQuery();
-  const user = useUser();
+const Feed = () => {
+  const { data, isLoading: postLoading } = api.posts.getAll.useQuery();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (postLoading) return <LoadingPage />;
 
   if (!data) {
     return <div>Something went wrong</div>;
   }
+
+  return (
+    <article className="flex flex-col">
+      {data.map(({ post, author }) => (
+        <PostView key={post.id} post={post} author={author} />
+      ))}
+    </article>
+  );
+};
+const Home: NextPage = () => {
+  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
+
+  // Start fetching asap (caching)
+  api.posts.getAll.useQuery();
+
+  // Return empty div if user isn't loaded
+  if (!userLoaded) return <div />;
 
   return (
     <>
@@ -81,14 +94,14 @@ const Home: NextPage = () => {
       <main className="flex h-screen justify-center">
         <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
           <div className="border-b border-slate-400 p-4">
-            {!user.isSignedIn && (
+            {!isSignedIn && (
               <div className="flex justify-center">
                 <SignInButton mode="modal">
                   <button>Sign in</button>
                 </SignInButton>
               </div>
             )}
-            {!!user.isSignedIn && (
+            {!!isSignedIn && (
               <div className="">
                 <CreatePostWizard />
                 {/* <SignOutButton>
@@ -97,12 +110,7 @@ const Home: NextPage = () => {
               </div>
             )}
           </div>
-
-          <article className="flex flex-col">
-            {data.map(({ post, author }) => (
-              <PostView key={post.id} post={post} author={author} />
-            ))}
-          </article>
+          <Feed />
         </div>
       </main>
     </>
