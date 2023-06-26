@@ -9,6 +9,7 @@ import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 dayjs.extend(relativeTime);
 
@@ -36,7 +37,7 @@ const CreatePostWizard = () => {
   });
 
   if (!user) return null;
-
+  // TODO: replace this with react-hook-form
   return (
     <div className="flex gap-3">
       <Image
@@ -85,10 +86,12 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col text-slate-300">
         <div className="flex text-slate-300">
-          <span>{`@${author.username}`}</span>
-          <span className="font-thin">
+          
+          <Link href={`/@${author.username}`}><span>{`@${author.username}`}</span></Link>
+          <Link href={`/post/${post.id}`}>          <span className="font-thin">
             &nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}
-          </span>
+          </span></Link>
+
         </div>
         <span className="text-2xl">{post.content}</span>
       </div>
