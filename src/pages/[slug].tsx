@@ -2,11 +2,44 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import Image from "next/image";
+import { LoadingSpinner } from "~/components/loading";
+import { PostView } from "~/components/PostView";
+import { PageLayout } from "~/components/layout";
 
 // PROFILE PAGE
 
 type ProfilePageProps = {
   username: string;
+};
+
+const ProfileFeed = (props: {
+  author: {
+    username: string;
+    profileImageUrl: string;
+    id: string;
+  };
+}) => {
+  const { data, isLoading } = api.posts.getPostByAuthorId.useQuery({
+    authorId: props.author.id,
+  });
+
+  if (isLoading)
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
+
+  if (!data || data.length === 0)
+    return <div>User hasn&apos;t posted yet.</div>;
+
+  return (
+    <article className="flex flex-col">
+      {data.map((post) => (
+        <PostView key={post.id} post={post} author={props.author} />
+      ))}
+    </article>
+  );
 };
 
 const ProfilePage: NextPage<ProfilePageProps> = (props) => {
@@ -55,7 +88,6 @@ import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
-import { PageLayout } from "~/components/layout";
 
 // this function means it will be treated mostly as a static asset
 export const getStaticProps: GetStaticProps = async (context) => {
