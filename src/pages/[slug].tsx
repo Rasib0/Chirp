@@ -1,6 +1,7 @@
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
+import Image from "next/image";
 
 // PROFILE PAGE
 
@@ -30,9 +31,22 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
       <Head>
         <title>{`${username}'s Profile`}</title>
       </Head>
-      <main className="flex h-screen justify-center">
-        <div>{data.username}</div>
-      </main>
+      <PageLayout>
+        {/* Profile Image and background */}
+        <div className="relative h-48 border-slate-400 bg-slate-600">
+          <Image
+            src={data.profileImageUrl}
+            alt={`${username}'s Profile Image`}
+            width={160}
+            height={160}
+            className="absolute bottom-0 left-0 -mb-20 ml-4 rounded-full border-[5px] border-black bg-black"
+          />
+        </div>
+        <div className="h-20"></div>
+        {/* Info Box */}
+        <div className="px-10 py-4 text-2xl font-bold">@{data.username}</div>
+        <div className="w-full border-b border-slate-400"></div>
+      </PageLayout>
     </>
   );
 };
@@ -41,6 +55,7 @@ import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
+import { PageLayout } from "~/components/layout";
 
 // this function means it will be treated mostly as a static asset
 export const getStaticProps: GetStaticProps = async (context) => {

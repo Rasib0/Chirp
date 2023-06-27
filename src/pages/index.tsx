@@ -10,6 +10,7 @@ import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { PageLayout } from "~/components/layout";
 
 dayjs.extend(relativeTime);
 
@@ -79,7 +80,10 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div className="flex gap-3 border-b border-slate-400 p-4" key={post.id}>
+    <div
+      className="flex gap-3 border-b border-slate-400 p-4 transition duration-300 ease-in-out hover:bg-neutral-950"
+      key={post.id}
+    >
       <Image
         className="h-14 w-14 rounded-full"
         src={author.profileImageUrl}
@@ -87,9 +91,12 @@ const PostView = (props: PostWithUser) => {
         width="56"
         height="56"
       />
-      <div className="flex flex-col text-slate-300">
+      <div className="flex flex-col gap-1 text-slate-300">
         <div className="flex text-slate-300">
-          <Link href={`/@${author.username}`}>
+          <Link
+            className="underline-offset-2 hover:underline"
+            href={`/@${author.username}`}
+          >
             <span>{`@${author.username}`}</span>
           </Link>
           <Link href={`/post/${post.id}`}>
@@ -139,28 +146,31 @@ const Home: NextPage = () => {
         <meta name="description" content="💬" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen justify-center">
+      <PageLayout>
+        <div className="border-b border-slate-400 p-4">
+          {/* <main className="flex h-screen justify-center">
         <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
-          <div className="border-b border-slate-400 p-4">
-            {!isSignedIn && (
-              <div className="flex justify-center">
-                <SignInButton mode="modal">
-                  <button>Sign in</button>
-                </SignInButton>
-              </div>
-            )}
-            {!!isSignedIn && (
-              <div className="">
-                <CreatePostWizard />
-                {/* <SignOutButton>
+          <div className="border-b border-slate-400 p-4"> */}
+          {!isSignedIn && (
+            <div className="flex justify-center">
+              <SignInButton mode="modal">
+                <button>Sign in</button>
+              </SignInButton>
+            </div>
+          )}
+          {!!isSignedIn && (
+            <div className="">
+              <CreatePostWizard />
+              {/* <div className="flex justify-center">
+                <SignOutButton>
                   <button>Sign out</button>
-                </SignOutButton> */}
-              </div>
-            )}
-          </div>
-          <Feed />
+                </SignOutButton>
+              </div> */}
+            </div>
+          )}
         </div>
-      </main>
+        <Feed />
+      </PageLayout>
     </>
   );
 };
