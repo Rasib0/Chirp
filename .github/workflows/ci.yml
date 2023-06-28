@@ -9,7 +9,9 @@ jobs:
       DATABASE_URL: "https://google.com"
       UPSTASH_REDIS_REST_URL: "https://google.com"
       UPSTASH_REDIS_REST_TOKEN: "https://google.com"
-    steps:
+      CLERK_SECRET_KEY: "https:///google.com"
+   
+  steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
