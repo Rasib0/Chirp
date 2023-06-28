@@ -1,5 +1,6 @@
 ## Chirp
-[Chirp](https://chirp-two-eta.vercel.app) is a Twitter clone that allows users to express themselves through tweets composed entirely of emojis!
+
+Chirp (Demo 🐦 [here](https://chirp-two-eta.vercel.app)!) is a Twitter clone that empowers users to unleash their imagination by crafting tweets exclusively with emojis! 🌟
 
  ### Techstack
 - [Next.js](https://nextjs.org)
