@@ -12,16 +12,22 @@ export const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
     <div
-      className="flex gap-3 border-b border-slate-400 p-4 transition duration-300 ease-in-out hover:bg-neutral-950"
+      className="flex gap-3 border-b border-slate-700 p-4 transition duration-300 ease-in-out hover:bg-neutral-950"
       key={post.id}
     >
-      <Image
-        className="h-14 w-14 rounded-full"
-        src={author.profileImageUrl}
-        alt={`@${author.username}'s profile picture`}
-        width="56"
-        height="56"
-      />
+      <Link
+        className="underline-offset-2 hover:underline"
+        href={`/@${author.username}`}
+      >
+        <Image
+          className="h-12 w-12 rounded-full"
+          src={author.profileImageUrl}
+          alt={`@${author.username}'s profile picture`}
+          width="48"
+          height="48"
+        />
+      </Link>
+
       <div className="flex flex-col gap-1 text-slate-300">
         <div className="flex text-slate-300">
           <Link
@@ -30,11 +36,9 @@ export const PostView = (props: PostWithUser) => {
           >
             <span>{`@${author.username}`}</span>
           </Link>
-          <Link href={`/post/${post.id}`}>
+          <Link className=" font-thin" href={`/post/${post.id}`}>
             {" "}
-            <span className="font-thin">
-              &nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}
-            </span>
+            <span>&nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}</span>
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>

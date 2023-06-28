@@ -60,7 +60,7 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
       </Head>
       <PageLayout>
         {/* Profile Image and background */}
-        <div className="relative h-48 border-slate-400 bg-slate-600">
+        <div className="relative h-48 border-slate-700 bg-slate-600">
           <Image
             src={data.profileImageUrl}
             alt={`${username}'s Profile Image`}
@@ -72,7 +72,7 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
         <div className="h-20"></div>
         {/* Info Box */}
         <div className="px-10 py-4 text-2xl font-bold">@{data.username}</div>
-        <div className="w-full border-b border-slate-400"></div>
+        <div className="w-full border-b border-slate-700"></div>
         <ProfileFeed authorId={data.id} />
       </PageLayout>
     </>

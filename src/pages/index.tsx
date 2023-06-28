@@ -5,7 +5,7 @@ import { api } from "~/utils/api";
 
 import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
@@ -13,8 +13,8 @@ import { PostView } from "../components/postview";
 //TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
 //TODO: You might also want to sync your database with clerk
 //TODO: Add OG image support
+
 const CreatePostWizard = () => {
-  //const { isSignedIn, user, isLoaded } = useUser();
   const { user } = useUser();
   const [input, setInput] = useState("");
 
@@ -23,7 +23,7 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-      void ctx.posts.getAll.invalidate();
+      void ctx.posts.getBatch.invalidate();
     },
     onError: (err) => {
       const errorMessage = err.data?.zodError?.fieldErrors?.content;
@@ -44,14 +44,14 @@ const CreatePostWizard = () => {
         <title>Home</title>
       </Head>
       <Image
-        className="h-14 w-14 rounded-full"
+        className="h-12 w-12 rounded-full"
         src={user.profileImageUrl}
         alt="Profile Image"
-        width="56"
-        height="56"
+        width="48"
+        height="48"
       />
       <input
-        className="grow bg-transparent outline-none"
+        className="grow border-red-500 bg-transparent outline-none"
         placeholder="Type some emojis!"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -63,20 +63,59 @@ const CreatePostWizard = () => {
         }}
         disabled={isPosting}
       />
-      {input !== "" && !isPosting && (
-        <button onClick={() => mutate({ content: input })}>Post</button>
-      )}
-      {isPosting && (
-        <div className="flex items-center justify-center">
-          <LoadingSpinner size={20} />
-        </div>
-      )}
+      <div className="flex items-center">
+        {!isPosting && (
+          <button
+            className="h-10 rounded-full bg-blue-600 px-4 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={input === ""}
+            onClick={() => mutate({ content: input })}
+          >
+            Tweet
+          </button>
+        )}
+        {isPosting && (
+          <div className="mr-8 flex items-center justify-center">
+            <LoadingSpinner size={20} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
+const useScrollPosition = (
+  scrollPosition: number,
+  setScrollPosition: Dispatch<SetStateAction<number>>
+) => {
+  const handleScroll = () => {
+    //TODO: use debounce to prevent too many rerenders, and see if you can move the state inside the hook
+    //const position = window.scrollY;
+    const height =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
+    const winScroll =
+      document.body.scrollTop || document.documentElement.scrollTop;
+    const scrolled = (winScroll / height) * 100;
+
+    setScrollPosition(scrolled);
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    console.log("scroll", scrollPosition);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return scrollPosition;
+};
+
 const Feed = () => {
-  // const { data, isLoading: postLoading } = api.posts.getAll.useQuery();
+  const [scrollPosition, setScrollPosition] = useState(0);
+
   const {
     data,
     isLoading: postLoading,
@@ -93,6 +132,18 @@ const Feed = () => {
     }
   );
 
+  const scrollPositionOutput = useScrollPosition(
+    scrollPosition,
+    setScrollPosition
+  );
+
+  useEffect(() => {
+    if (scrollPositionOutput > 90 && hasNextPage && !isFetching) {
+      void fetchNextPage();
+      setScrollPosition(0);
+    }
+  }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching]);
+
   if (postLoading) return <LoadingPage />;
 
   if (!data) {
@@ -101,30 +152,45 @@ const Feed = () => {
 
   const posts = data.pages.flatMap((page) => page.postsWithUserData);
 
+  // console.log("scrollPosition", scrollPosition);
+
+  //TODO: add a horizontal loading spinner that twitter uses when you tweet, also add animation to hide th tweet with animation like it's being consumed when you tweet
   return (
     <article className="flex flex-col">
       {posts.map(({ post, author }) => (
         <PostView key={post.id} post={post} author={author} />
       ))}
 
-      <button
-        className="m-2 rounded-md border border-slate-400 bg-transparent p-2 disabled:cursor-not-allowed disabled:opacity-50"
-        onClick={() => {
-          void fetchNextPage();
-        }}
-        disabled={!hasNextPage || isFetching}
-      >
-        Load more
-      </button>
+      {!hasNextPage ? (
+        <div className="flex justify-center">
+          <p className="p-4 font-semibold text-blue-500">
+            No more posts to load
+          </p>
+        </div>
+      ) : (
+        <div className="flex justify-center p-4">
+          <LoadingSpinner size={30} />
+        </div>
+      )}
     </article>
   );
 };
 
 const Home: NextPage = () => {
-  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap (caching)
-  api.posts.getAll.useQuery();
+  api.posts.getBatch.useInfiniteQuery(
+    {
+      limit: 10,
+    },
+    {
+      onSuccess: (data) => {
+        console.log("data", data.pages[0]?.postsWithUserData[0]?.post.content);
+      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
 
   // Return empty div if user isn't loaded
   if (!userLoaded) return <div />;
@@ -137,14 +203,22 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <PageLayout>
-        <div className="border-b border-slate-400 p-4">
+        <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
+          <div className="flex justify-between">
+            <h1 className="text-xl font-bold text-white">Home</h1>
+          </div>
+        </header>
+        <div className="border-b border-slate-700 p-4">
           {/* <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
-          <div className="border-b border-slate-400 p-4"> */}
+        <div className="h-full w-full border-x border-slate-700 md:max-w-2xl">
+          <div className="border-b border-slate-700 p-4"> */}
           {!isSignedIn && (
+            // style the sign in button
             <div className="flex justify-center">
               <SignInButton mode="modal">
-                <button>Sign in</button>
+                <button className="font-bold text-blue-500 hover:text-blue-600">
+                  Sign in
+                </button>
               </SignInButton>
             </div>
           )}
