@@ -51,6 +51,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       trpcState: helpers.dehydrate(), // this let's the data be prefetched on the server so it's available immediately, so loading state is never hit
       id,
     },
+    // you can set custom refresh and revalidate times here
   };
 };
 
