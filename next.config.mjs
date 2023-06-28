@@ -18,7 +18,7 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
-  typesript: {
+  typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
