@@ -6,9 +6,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-        DATABASE_URL: "https://google.com"
-        UPSTASH_REDIS_REST_URL: "https://google.com"
-
+      DATABASE_URL: "https://google.com"
+      UPSTASH_REDIS_REST_URL: "https://google.com"
+      UPSTASH_REDIS_REST_TOKEN: "https://google.com"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
