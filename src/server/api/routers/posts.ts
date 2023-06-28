@@ -70,10 +70,9 @@ export const postRouter = createTRPCRouter({
         }
       })
       return post;
-    }
-    ),
+    }),
 
-  getOne: publicProcedure.input(z.object({ id: z.string() }))
+  getByPostId: publicProcedure.input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
 
       const post = await ctx.prisma.post.findUnique({
@@ -82,16 +81,13 @@ export const postRouter = createTRPCRouter({
         }
       })
 
-      console.log("TESTING:", post); //TODO: remove this
-
       if (!post) throw new TRPCError({
         code: "NOT_FOUND",
         message: "Post not found",
       });
 
-      return post;
-    }
-    ),
+      return (await addUserDataToPosts([post]))[0];
+    }),
 
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
@@ -101,10 +97,9 @@ export const postRouter = createTRPCRouter({
       },
     });
     return addUserDataToPosts(posts);
-  }
-  ),
+  }),
 
-  getPostByAuthorId: publicProcedure.input(z.object({ authorId: z.string() }))
+  getPostsByAuthorId: publicProcedure.input(z.object({ authorId: z.string() }))
     .query(async ({ input, ctx }) => {
 
       const posts = await ctx.prisma.post.findMany({

@@ -13,7 +13,7 @@ type ProfilePageProps = {
 };
 
 const ProfileFeed = (props: { authorId: string }) => {
-  const { data, isLoading } = api.posts.getPostByAuthorId.useQuery({
+  const { data, isLoading } = api.posts.getPostsByAuthorId.useQuery({
     authorId: props.authorId,
   });
 
