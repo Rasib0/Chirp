@@ -6,8 +6,7 @@ import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/ap
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
-import { Post } from "@prisma/client";
-import { constants } from "fs";
+import type { Post } from "@prisma/client";
 
 
 const addUserDataToPosts = async (posts: Post[]) => {
@@ -91,7 +90,7 @@ export const postRouter = createTRPCRouter({
 
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
-      take: 100,
+      take: 100, // TODO: a good thing to do would be remove this take 100 and replace it with infiniteQuery with Pagination
       orderBy: {
         createdAt: "desc",
       },
