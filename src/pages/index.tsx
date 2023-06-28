@@ -10,6 +10,10 @@ import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
 
+
+//TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
+//TODO: You might also want to sync your database with clerk
+//TODO: Add OG image support 
 const CreatePostWizard = () => {
   //const { isSignedIn, user, isLoaded } = useUser();
   const { user } = useUser();
