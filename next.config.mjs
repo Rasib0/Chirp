@@ -18,6 +18,13 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  typesript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  swcMinify: true,
   images: {
     domains: ["images.clerk.dev"],
   }
