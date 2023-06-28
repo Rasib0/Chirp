@@ -2,8 +2,8 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import Image from "next/image";
-import { LoadingSpinner } from "~/components/loading";
-import { PostView } from "~/components/PostView";
+import { LoadingPage } from "~/components/loading";
+import { PostView } from "~/components/postview";
 import { PageLayout } from "~/components/layout";
 
 // PROFILE PAGE
@@ -12,21 +12,15 @@ type ProfilePageProps = {
   username: string;
 };
 
-const ProfileFeed = (props: {
-  author: {
-    username: string;
-    profileImageUrl: string;
-    id: string;
-  };
-}) => {
+const ProfileFeed = (props: { authorId: string }) => {
   const { data, isLoading } = api.posts.getPostByAuthorId.useQuery({
-    authorId: props.author.id,
+    authorId: props.authorId,
   });
 
   if (isLoading)
     return (
       <div>
-        <LoadingSpinner />
+        <LoadingPage />
       </div>
     );
 
@@ -35,8 +29,8 @@ const ProfileFeed = (props: {
 
   return (
     <article className="flex flex-col">
-      {data.map((post) => (
-        <PostView key={post.id} post={post} author={props.author} />
+      {data.map((fullPost) => (
+        <PostView key={fullPost.post.id} {...fullPost} />
       ))}
     </article>
   );
@@ -79,6 +73,7 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
         {/* Info Box */}
         <div className="px-10 py-4 text-2xl font-bold">@{data.username}</div>
         <div className="w-full border-b border-slate-400"></div>
+        <ProfileFeed authorId={data.id} />
       </PageLayout>
     </>
   );

@@ -6,6 +6,35 @@ import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/ap
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
+import { Post } from "@prisma/client";
+import { constants } from "fs";
+
+
+const addUserDataToPosts = async (posts: Post[]) => {
+
+  // get all user information for each post
+  const users = (await clerkClient.users.getUserList({
+    userId: posts.map((post) => post.authorId),
+    limit: 100,
+  })).map(filterUserForClient);
+
+  return posts.map((post) => {
+    const author = users.find((user) => user.id === post.authorId);
+
+    if (!author || !author.username) throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Author for post not found",
+    });
+
+    return {
+      post,
+      author: {
+        ...author,
+        username: author.username,
+      },
+    }
+  })
+}
 
 // Create a new ratelimiter, that allows 3 requests per 1 minute
 const ratelimit = new Ratelimit({
@@ -71,35 +100,10 @@ export const postRouter = createTRPCRouter({
         createdAt: "desc",
       },
     });
-
-    // get all user information for each post
-    const users = (await clerkClient.users.getUserList({
-      userId: posts.map((post) => post.authorId),
-      limit: 100,
-    })).map(filterUserForClient);
-
-    //TODO: console.log("TESTING:", users);
-
-    return posts.map((post) => {
-      const author = users.find((user) => user.id === post.authorId);
-
-      if (!author || !author.username) throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Author for post not found",
-      });
-
-      //TODO: console.log("TESTING:", author.username);
-
-      return {
-        post,
-        author: {
-          ...author,
-          username: author.username,
-        },
-      }
-    })
+    return addUserDataToPosts(posts);
   }
   ),
+
   getPostByAuthorId: publicProcedure.input(z.object({ authorId: z.string() }))
     .query(async ({ input, ctx }) => {
 
@@ -113,7 +117,7 @@ export const postRouter = createTRPCRouter({
         },
       });
 
-      return posts;
+      return addUserDataToPosts(posts);
 
     })
 
