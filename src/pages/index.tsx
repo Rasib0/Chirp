@@ -10,10 +10,9 @@ import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
 
-
 //TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
 //TODO: You might also want to sync your database with clerk
-//TODO: Add OG image support 
+//TODO: Add OG image support
 const CreatePostWizard = () => {
   //const { isSignedIn, user, isLoaded } = useUser();
   const { user } = useUser();
@@ -77,7 +76,22 @@ const CreatePostWizard = () => {
 };
 
 const Feed = () => {
-  const { data, isLoading: postLoading } = api.posts.getAll.useQuery();
+  // const { data, isLoading: postLoading } = api.posts.getAll.useQuery();
+  const {
+    data,
+    isLoading: postLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+  } = api.posts.getBatch.useInfiniteQuery(
+    {
+      limit: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      // initialCursor: 1, // <-- optional you can pass an initialCursor
+    }
+  );
 
   if (postLoading) return <LoadingPage />;
 
@@ -85,11 +99,23 @@ const Feed = () => {
     return <div>Something went wrong</div>;
   }
 
+  const posts = data.pages.flatMap((page) => page.postsWithUserData);
+
   return (
     <article className="flex flex-col">
-      {data.map(({ post, author }) => (
+      {posts.map(({ post, author }) => (
         <PostView key={post.id} post={post} author={author} />
       ))}
+
+      <button
+        className="m-2 rounded-md border border-slate-400 bg-transparent p-2 disabled:cursor-not-allowed disabled:opacity-50"
+        onClick={() => {
+          void fetchNextPage();
+        }}
+        disabled={!hasNextPage || isFetching}
+      >
+        Load more
+      </button>
     </article>
   );
 };

@@ -7,6 +7,7 @@ import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 import type { Post } from "@prisma/client";
+import next from "next/types";
 
 
 const addUserDataToPosts = async (posts: Post[]) => {
@@ -55,7 +56,7 @@ export const postRouter = createTRPCRouter({
   //   return ctx.prisma.post.findMany();
   // }),
   create: privateProcedure
-    .input(z.object({ content: z.string().emoji("Only emojis are allowed!").min(1).max(200) }))
+    .input(z.object({ content: z.string().emoji("Only emojis are allowed!").min(1).max(200, "Too long!") }))
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
 
@@ -113,12 +114,42 @@ export const postRouter = createTRPCRouter({
 
       return addUserDataToPosts(posts);
 
-    })
+    }),
+
+  getBatch: publicProcedure.input(z.object({
+    limit: z.number().min(1).max(100).nullish(),
+    cursor: z.string().nullish(),
+    authorId: z.string().optional(),
+  }))
+    .query(async ({ input, ctx }) => {
+      const limit = input.limit ?? 10;
+      const { cursor, authorId } = input;
 
 
+      const posts = await ctx.prisma.post.findMany({
+        take: limit + 1,
+        where: {
+          authorId
+        },
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
+      let nextCursor: typeof cursor | undefined = undefined;
 
+      if (posts.length > limit) {
+        const nextPost = posts.pop();
+        nextCursor = nextPost?.id;
+      }
+      const postsWithUserData = await addUserDataToPosts(posts);
 
+      return {
+        postsWithUserData,
+        nextCursor,
+      };
+    }),
 
 
   //
