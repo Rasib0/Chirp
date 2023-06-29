@@ -1,9 +1,4 @@
-import {
-  SignInButton,
-  SignOutButton,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
@@ -15,6 +10,7 @@ import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
 
 //TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
 //TODO: You might also want to sync your database with clerk
@@ -23,12 +19,16 @@ import Link from "next/link";
 const CreatePostWizard = () => {
   const { user } = useUser();
   const [input, setInput] = useState("");
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors },
+  // } = useForm();
 
   const ctx = api.useContext();
 
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
-      setInput("");
       void ctx.posts.getBatch.invalidate();
     },
     onError: (err) => {
@@ -46,13 +46,16 @@ const CreatePostWizard = () => {
   if (!user.username) return null;
   if (!user.profileImageUrl) return null;
 
-  // TODO: replace this with react-hook-form
+  // const onSubmit = (data: { input: string }) => {
+  //   mutate({ content: data.input });
+  // };
+
   return (
     <>
       <Head>
         <title>Home</title>
       </Head>
-      <div className="flex gap-1 sm:gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <Link href={`/@${user.username}`} className="flex-shrink-0">
           <Image
             className="h-12 w-12 rounded-full"
@@ -62,36 +65,37 @@ const CreatePostWizard = () => {
             height="48"
           />
         </Link>
-
-        <input
-          className="grow overflow-hidden rounded-sm bg-transparent p-1 outline-none"
-          placeholder="Type some emojis!"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          // submit on enter
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              mutate({ content: input });
-            }
-          }}
-          disabled={isPosting}
-        />
-        {!isPosting && (
-          <button
-            className="h-12 w-fit rounded-full bg-blue-600  px-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:font-semibold"
-            disabled={input === ""}
-            onClick={() => mutate({ content: input })}
-          >
-            Tweet
-          </button>
-        )}
-        <div className="flex items-center">
-          {isPosting && (
-            <div className="mr-8 flex items-center justify-center">
-              <LoadingSpinner size={20} />
-            </div>
+        <form className="flex grow overflow-clip">
+          <input
+            className="grow overflow-clip overflow-ellipsis rounded-sm bg-transparent p-1 outline-none"
+            placeholder="Type some emojis!"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                mutate({ content: input });
+              }
+            }}
+            disabled={isPosting}
+          />
+          {!isPosting && (
+            <button
+              type="submit"
+              className="h-10 rounded-2xl bg-blue-600 px-2  text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:px-4 sm:font-semibold"
+              disabled={input === ""}
+            >
+              Tweet
+            </button>
           )}
-        </div>
+          <div className="flex items-center">
+            {isPosting && (
+              <div className="mr-8 flex items-center justify-center">
+                <LoadingSpinner size={20} />
+              </div>
+            )}
+          </div>
+        </form>
       </div>
     </>
   );
@@ -165,7 +169,7 @@ const Feed = () => {
           console.log(err);
         });
     }
-  }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching]);
+  }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching, isLocked]);
 
   if (postLoading) return <LoadingPage />;
 

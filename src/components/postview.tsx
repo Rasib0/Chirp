@@ -27,17 +27,19 @@ export const PostView = (props: PostWithUser) => {
         />
       </Link>
 
-      <div className="flex flex-col gap-1 overflow-auto text-slate-300">
+      <div className="flex flex-col gap-1 overflow-clip text-slate-300">
         <div className="flex text-slate-300">
           <Link
-            className="underline-offset-2 hover:underline"
+            className="overflow-clip overflow-ellipsis underline-offset-2 hover:underline"
             href={`/@${author.username}`}
           >
-            <span>{`@${author.username}`}</span>
+            {`@${author.username}`}
           </Link>
-          <Link className="font-thin" href={`/post/${post.id}`}>
-            {" "}
-            <span>&nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}</span>
+          <Link
+            className="overflow-clip overflow-ellipsis font-thin"
+            href={`/post/${post.id}`}
+          >
+            &nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>
