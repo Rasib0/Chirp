@@ -15,10 +15,7 @@ export const PostView = (props: PostWithUser) => {
       className="flex gap-3 border-b border-slate-700 p-4 transition duration-300 ease-in-out hover:bg-neutral-950"
       key={post.id}
     >
-      <Link
-        className="underline-offset-2 hover:underline"
-        href={`/@${author.username}`}
-      >
+      <Link href={`/@${author.username}`} className="flex-shrink-0">
         <Image
           className="h-12 w-12 rounded-full"
           src={author.profileImageUrl}
@@ -36,12 +33,13 @@ export const PostView = (props: PostWithUser) => {
           >
             <span>{`@${author.username}`}</span>
           </Link>
-          <Link className=" font-thin" href={`/post/${post.id}`}>
+          <Link className="font-thin" href={`/post/${post.id}`}>
             {" "}
             <span>&nbsp;·&nbsp;{dayjs(post.createdAt).fromNow()}</span>
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>
+
       </div>
     </div>
   );

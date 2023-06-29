@@ -17,12 +17,7 @@ const ProfileFeed = (props: { authorId: string }) => {
     authorId: props.authorId,
   });
 
-  if (isLoading)
-    return (
-      <div>
-        <LoadingPage />
-      </div>
-    );
+  if (isLoading) return <LoadingPage />;
 
   if (!data || data.length === 0)
     return <div>User hasn&apos;t posted yet.</div>;

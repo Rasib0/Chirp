@@ -164,7 +164,7 @@ const Feed = () => {
       {!hasNextPage ? (
         <div className="flex justify-center">
           <p className="p-4 font-semibold text-blue-500">
-            No more posts to load
+            No more tweets to load
           </p>
         </div>
       ) : (
@@ -206,6 +206,15 @@ const Home: NextPage = () => {
         <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
           <div className="flex justify-between">
             <h1 className="text-xl font-bold text-white">Home</h1>
+            {isSignedIn && (
+              <div className="flex justify-center px-2">
+                <SignOutButton>
+                  <button className="font-bold text-blue-500 hover:text-blue-600">
+                    Logout
+                  </button>
+                </SignOutButton>
+              </div>
+            )}
           </div>
         </header>
         <div className="border-b border-slate-700 p-4">
@@ -225,11 +234,6 @@ const Home: NextPage = () => {
           {!!isSignedIn && (
             <div className="">
               <CreatePostWizard />
-              {/* <div className="flex justify-center">
-                <SignOutButton>
-                  <button>Sign out</button>
-                </SignOutButton>
-              </div> */}
             </div>
           )}
         </div>
