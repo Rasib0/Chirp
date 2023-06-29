@@ -157,13 +157,12 @@ const Feed = () => {
   );
 
   useEffect(() => {
-    if (scrollPositionOutput > 85 && hasNextPage && !isFetching && !isLocked) {
+    if (scrollPositionOutput > 90 && hasNextPage && !isFetching && !isLocked) {
       setIsLocked(true);
-      console.log("Fetching next page");
+      setScrollPosition(0);
       fetchNextPage()
         .then(() => {
           setIsLocked(false);
-          console.log("Fetched next pag");
         })
         .catch((err) => {
           console.log(err);
