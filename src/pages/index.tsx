@@ -174,7 +174,7 @@ const Feed = () => {
   if (postLoading) return <LoadingPage />;
 
   if (!data) {
-    return <div>Something went wrong</div>;
+    return <div>Something went wrong.</div>;
   }
 
   const posts = data.pages.flatMap((page) => page.postsWithUserData);
@@ -196,7 +196,28 @@ const Feed = () => {
         </div>
       ) : (
         <div className="flex justify-center p-4">
-          <LoadingSpinner size={30} />
+          {isFetching && false ? (
+            <LoadingSpinner size={30} />
+          ) : (
+            <p>
+              Not seeing older tweets?{" "}
+              <button
+                className="font-semibold text-blue-500"
+                onClick={() => {
+                  fetchNextPage()
+                    .then(() => {
+                      setIsLocked(false);
+                      console.log("Fetched next pag");
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                }}
+              >
+                Load more
+              </button>
+            </p>
+          )}
         </div>
       )}
     </article>
