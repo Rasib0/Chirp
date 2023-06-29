@@ -117,6 +117,7 @@ const useScrollPosition = (
 
 const Feed = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
 
   const {
     data,
@@ -140,9 +141,17 @@ const Feed = () => {
   );
 
   useEffect(() => {
-    if (scrollPositionOutput > 90 && hasNextPage && !isFetching) {
-      void fetchNextPage();
-      setScrollPosition(0);
+    if (scrollPositionOutput > 85 && hasNextPage && !isFetching && !isLocked) {
+      setIsLocked(true);
+      console.log("Fetching next page")
+      fetchNextPage()
+        .then(() => {
+          setIsLocked(false);
+          console.log("Fetched next pag")
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching]);
 
@@ -154,7 +163,7 @@ const Feed = () => {
 
   const posts = data.pages.flatMap((page) => page.postsWithUserData);
 
-  // console.log("scrollPosition", scrollPosition);
+  console.log("scrollPosition", scrollPosition);
 
   //TODO: add a horizontal loading spinner that twitter uses when you tweet, also add animation to hide th tweet with animation like it's being consumed when you tweet
   return (
