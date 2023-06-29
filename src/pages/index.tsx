@@ -222,7 +222,7 @@ const Home: NextPage = () => {
       </Head>
       <PageLayout>
         <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
-          <div className="flex justify-between">
+          <div className="flex justify-between px-1">
             <h1 className="text-xl font-bold text-white">Home</h1>
             {isSignedIn && (
               <div className="flex justify-center px-2">
@@ -233,24 +233,23 @@ const Home: NextPage = () => {
                 </SignOutButton>
               </div>
             )}
+            {!isSignedIn && (
+              // style the sign in button
+              <div className="flex justify-center">
+                <SignInButton mode="modal">
+                  <button className="font-bold text-blue-500 hover:text-blue-600">
+                    Sign in
+                  </button>
+                </SignInButton>
+              </div>
+            )}
           </div>
         </header>
-        <div className="border-b border-slate-700 p-4">
-          {/* <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-slate-700 md:max-w-2xl">
-          <div className="border-b border-slate-700 p-4"> */}
-          {!isSignedIn && (
-            // style the sign in button
-            <div className="flex justify-center">
-              <SignInButton mode="modal">
-                <button className="font-bold text-blue-500 hover:text-blue-600">
-                  Sign in
-                </button>
-              </SignInButton>
-            </div>
-          )}
-          {!!isSignedIn && <CreatePostWizard />}
-        </div>
+        {!!isSignedIn && (
+          <div className="border-b border-slate-700 p-4">
+            <CreatePostWizard />
+          </div>
+        )}
         <Feed />
       </PageLayout>
     </>
