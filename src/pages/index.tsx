@@ -9,6 +9,7 @@ import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
+import Link from "next/link";
 
 //TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
 //TODO: You might also want to sync your database with clerk
@@ -37,6 +38,9 @@ const CreatePostWizard = () => {
   });
 
   if (!user) return null;
+  if (!user.username) return null;
+  if (!user.profileImageUrl) return null;
+
   // TODO: replace this with react-hook-form
   return (
     <>
@@ -44,13 +48,16 @@ const CreatePostWizard = () => {
         <title>Home</title>
       </Head>
       <div className="flex gap-1 sm:gap-2">
-        <Image
-          className="h-fit w-fit rounded-full"
-          src={user.profileImageUrl}
-          alt="Profile Image"
-          width="48"
-          height="48"
-        />
+        <Link href={`/@${user.username}`} className="flex-shrink-0">
+          <Image
+            className="h-12 w-12 rounded-full"
+            src={user.profileImageUrl}
+            alt={`@${user.username}'s profile picture`}
+            width="48"
+            height="48"
+          />
+        </Link>
+
         <input
           className="grow overflow-hidden rounded-sm bg-transparent p-1 outline-none"
           placeholder="Type some emojis!"
@@ -143,11 +150,11 @@ const Feed = () => {
   useEffect(() => {
     if (scrollPositionOutput > 85 && hasNextPage && !isFetching && !isLocked) {
       setIsLocked(true);
-      console.log("Fetching next page")
+      console.log("Fetching next page");
       fetchNextPage()
         .then(() => {
           setIsLocked(false);
-          console.log("Fetched next pag")
+          console.log("Fetched next pag");
         })
         .catch((err) => {
           console.log(err);
@@ -242,11 +249,7 @@ const Home: NextPage = () => {
               </SignInButton>
             </div>
           )}
-          {!!isSignedIn && (
-            <div className="">
-              <CreatePostWizard />
-            </div>
-          )}
+          {!!isSignedIn && <CreatePostWizard />}
         </div>
         <Feed />
       </PageLayout>

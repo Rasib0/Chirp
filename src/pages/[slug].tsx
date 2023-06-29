@@ -54,6 +54,25 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
         <title>{`${username}'s Profile`}</title>
       </Head>
       <PageLayout>
+        <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
+          <div className="justify-left flex items-center text-xl font-bold text-white">
+            <Link href="\">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="inline-block h-8 w-8 cursor-pointer rounded-full p-1 transition duration-100 ease-in-out hover:bg-neutral-800 hover:bg-opacity-50"
+                fill="none"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M11.7071 4.29289C12.0976 4.68342 12.0976 5.31658 11.7071 5.70711L6.41421 11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13H6.41421L11.7071 18.2929C12.0976 18.6834 12.0976 19.3166 11.7071 19.7071C11.3166 20.0976 10.6834 20.0976 10.2929 19.7071L3.29289 12.7071C3.10536 12.5196 3 12.2652 3 12C3 11.7348 3.10536 11.4804 3.29289 11.2929L10.2929 4.29289C10.6834 3.90237 11.3166 3.90237 11.7071 4.29289Z"
+                  fill="#FFFFFF"
+                />
+              </svg>
+            </Link>
+            <span className="ml-2">Home</span>
+          </div>
+        </header>
         {/* Profile Image and background */}
         <div className="relative h-48 border-slate-700 bg-slate-600">
           <Image
@@ -78,6 +97,7 @@ import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
+import Link from "next/link";
 
 // this function means it will be treated mostly as a static asset
 export const getStaticProps: GetStaticProps = async (context) => {
