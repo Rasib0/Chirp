@@ -196,7 +196,7 @@ const Feed = () => {
         </div>
       ) : (
         <div className="flex justify-center p-4">
-          {isFetching && false ? (
+          {isFetching ? (
             <LoadingSpinner size={30} />
           ) : (
             <p>
