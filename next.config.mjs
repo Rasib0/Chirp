@@ -26,7 +26,7 @@ const config = {
   },
   swcMinify: true,
   images: {
-    domains: ["images.clerk.dev"],
+    domains: ["images.clerk.dev", "www.gravatar.com"],
   }
 };
 export default config;

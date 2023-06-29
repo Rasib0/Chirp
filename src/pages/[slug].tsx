@@ -56,7 +56,7 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
       <PageLayout>
         <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
           <div className="justify-left flex items-center text-xl font-bold text-white">
-            <Link href="\">
+            <Link href="/">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="inline-block h-8 w-8 cursor-pointer rounded-full p-1 transition duration-100 ease-in-out hover:bg-neutral-800 hover:bg-opacity-50"

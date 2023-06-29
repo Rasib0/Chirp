@@ -10,6 +10,8 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 
 export const PostView = (props: PostWithUser) => {
   const { post, author } = props;
+
+  console.log(author.profileImageUrl);
   return (
     <div
       className="flex gap-3 border-b border-slate-700 p-4 transition duration-300 ease-in-out hover:bg-neutral-950"
@@ -25,7 +27,7 @@ export const PostView = (props: PostWithUser) => {
         />
       </Link>
 
-      <div className="flex flex-col overflow-auto gap-1 text-slate-300">
+      <div className="flex flex-col gap-1 overflow-auto text-slate-300">
         <div className="flex text-slate-300">
           <Link
             className="underline-offset-2 hover:underline"
@@ -39,7 +41,6 @@ export const PostView = (props: PostWithUser) => {
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>
-
       </div>
     </div>
   );
