@@ -39,47 +39,49 @@ const CreatePostWizard = () => {
   if (!user) return null;
   // TODO: replace this with react-hook-form
   return (
-    <div className="flex gap-3">
+    <>
       <Head>
         <title>Home</title>
       </Head>
-      <Image
-        className="h-12 w-12 rounded-full"
-        src={user.profileImageUrl}
-        alt="Profile Image"
-        width="48"
-        height="48"
-      />
-      <input
-        className="grow border-red-500 bg-transparent outline-none"
-        placeholder="Type some emojis!"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        // submit on enter
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            mutate({ content: input });
-          }
-        }}
-        disabled={isPosting}
-      />
-      <div className="flex items-center">
+      <div className="flex gap-1 sm:gap-2">
+        <Image
+          className="h-fit w-fit rounded-full"
+          src={user.profileImageUrl}
+          alt="Profile Image"
+          width="48"
+          height="48"
+        />
+        <input
+          className="grow overflow-hidden rounded-sm bg-transparent p-1 outline-none"
+          placeholder="Type some emojis!"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          // submit on enter
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              mutate({ content: input });
+            }
+          }}
+          disabled={isPosting}
+        />
         {!isPosting && (
           <button
-            className="h-10 rounded-full bg-blue-600 px-4 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-12 w-fit rounded-full bg-blue-600  px-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:font-semibold"
             disabled={input === ""}
             onClick={() => mutate({ content: input })}
           >
             Tweet
           </button>
         )}
-        {isPosting && (
-          <div className="mr-8 flex items-center justify-center">
-            <LoadingSpinner size={20} />
-          </div>
-        )}
+        <div className="flex items-center">
+          {isPosting && (
+            <div className="mr-8 flex items-center justify-center">
+              <LoadingSpinner size={20} />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
