@@ -7,8 +7,7 @@ import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 import type { Post } from "@prisma/client";
-import next from "next/types";
-
+import { inputSchema } from "~/utils/validation";
 
 const addUserDataToPosts = async (posts: Post[]) => {
 
@@ -56,7 +55,7 @@ export const postRouter = createTRPCRouter({
   //   return ctx.prisma.post.findMany();
   // }),
   create: privateProcedure
-    .input(z.object({ content: z.string().emoji("Only emojis are allowed!").min(1).max(200, "Too long!") }))
+    .input(inputSchema)
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
 

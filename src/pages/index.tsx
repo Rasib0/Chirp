@@ -4,26 +4,36 @@ import Head from "next/head";
 import { api } from "~/utils/api";
 
 import Image from "next/image";
-import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import {
+  FullLoadingPage,
+  LoadingFeed,
+  LoadingSpinner,
+} from "~/components/loading";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "../components/postview";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { type SubmitHandler, useForm } from "react-hook-form";
 
-//TODO: you can use the same validator for emojis in the frontend and backend to validate on client side
+import { zodResolver } from "@hookform/resolvers/zod";
+import { inputSchema, type inputSchemaType } from "~/utils/validation";
+
+
 //TODO: You might also want to sync your database with clerk
 //TODO: Add OG image support
 
 const CreatePostWizard = () => {
   const { user } = useUser();
-  const [input, setInput] = useState("");
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   formState: { errors },
-  // } = useForm();
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<inputSchemaType>({
+    resolver: zodResolver(inputSchema),
+  });
 
   const ctx = api.useContext();
 
@@ -46,9 +56,10 @@ const CreatePostWizard = () => {
   if (!user.username) return null;
   if (!user.profileImageUrl) return null;
 
-  // const onSubmit = (data: { input: string }) => {
-  //   mutate({ content: data.input });
-  // };
+  const onSubmit: SubmitHandler<inputSchemaType> = (data) => {
+    mutate({ content: data.content });
+    reset();
+  };
 
   return (
     <>
@@ -65,25 +76,35 @@ const CreatePostWizard = () => {
             height="48"
           />
         </Link>
-        <form className="flex grow overflow-clip">
-          <input
-            className="grow overflow-clip overflow-ellipsis rounded-sm bg-transparent p-1 outline-none"
-            placeholder="Type some emojis!"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                mutate({ content: input });
-              }
-            }}
-            disabled={isPosting}
-          />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(onSubmit)().catch((err) => {
+              console.error(err);
+            });
+          }}
+          className="flex grow gap-1 overflow-clip"
+        >
+          <div className="flex grow flex-col overflow-clip">
+            <input
+              className="mt-3 rounded-full bg-transparent px-1 outline-none"
+              id="content"
+              placeholder="Type some emojis!"
+              {...register("content")}
+            />
+            <p
+              className={`overflow-clip overflow-ellipsis text-xs italic text-red-500 +${
+                errors.content ? "invisible" : ""
+              }`}
+            >
+              {errors.content ? errors.content.message : <span>&nbsp;</span>}
+            </p>
+          </div>
+
           {!isPosting && (
             <button
               type="submit"
-              className="h-10 rounded-2xl bg-blue-600 px-2  text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:px-4 sm:font-semibold"
-              disabled={input === ""}
+              className="mt-2 h-10 rounded-full bg-blue-600 px-2 text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:font-semibold"
             >
               Tweet
             </button>
@@ -120,7 +141,6 @@ const useScrollPosition = (
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
-    console.log("scroll", scrollPosition);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -170,7 +190,7 @@ const Feed = () => {
     }
   }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching, isLocked]);
 
-  if (postLoading) return <LoadingPage />;
+  if (postLoading) return <LoadingFeed />;
 
   if (!data) {
     return <div>Something went wrong.</div>;
@@ -178,7 +198,7 @@ const Feed = () => {
 
   const posts = data.pages.flatMap((page) => page.postsWithUserData);
 
-  console.log("scrollPosition", scrollPosition);
+  //console.log("scrollPosition", scrollPosition);
 
   //TODO: add a horizontal loading spinner that twitter uses when you tweet, also add animation to hide th tweet with animation like it's being consumed when you tweet
   return (
@@ -206,7 +226,6 @@ const Feed = () => {
                   fetchNextPage()
                     .then(() => {
                       setIsLocked(false);
-                      console.log("Fetched next pag");
                     })
                     .catch((err) => {
                       console.log(err);
@@ -224,7 +243,7 @@ const Feed = () => {
 };
 
 const Home: NextPage = () => {
-  const { isLoaded: userLoaded, isSignedIn } = useUser();
+  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap (caching)
   api.posts.getBatch.useInfiniteQuery(
@@ -233,14 +252,16 @@ const Home: NextPage = () => {
     },
     {
       onSuccess: (data) => {
-        console.log("data", data.pages[0]?.postsWithUserData[0]?.post.content);
+        console.log(
+          "onSuccess: ",
+          data.pages[0]?.postsWithUserData[0]?.post.content
+        );
       },
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
 
-  // Return empty div if user isn't loaded
-  if (!userLoaded) return <div />;
+  if (!userLoaded) return <FullLoadingPage />;
 
   return (
     <>
@@ -250,25 +271,21 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <PageLayout>
-        <header className="sticky top-0 z-10 border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
-          <div className="flex justify-between px-1">
+        <header className="sticky top-0 z-10 overflow-clip border-b border-slate-700 bg-opacity-5 p-4 backdrop-blur-md">
+          <div className="flex items-center justify-between px-1">
             <h1 className="text-xl font-bold text-white">Home</h1>
 
-            {isSignedIn && (
-              <div className="flex justify-center px-2">
+            {isSignedIn && user && user.username && (
+              <div className="flex items-center justify-center px-2">
                 <UserButton afterSignOutUrl="/" />
-                {/* <SignOutButton>
-                  <button className="font-bold text-blue-500 hover:text-blue-600">
-                    Logout
-                  </button>
-                </SignOutButton> */}
+                <span className="ml-2 font-thin">{`@${user.username}`}</span>
               </div>
             )}
             {!isSignedIn && (
               // style the sign in button
               <div className="flex justify-center">
                 <SignInButton mode="modal">
-                  <button className="font-bold text-blue-500 hover:text-blue-600">
+                  <button className="h-10 rounded-2xl bg-blue-600  px-2 font-semibold text-white hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-50 sm:rounded-full sm:px-3">
                     Sign in
                   </button>
                 </SignInButton>

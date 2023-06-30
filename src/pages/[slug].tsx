@@ -2,7 +2,7 @@ import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import { api } from "~/utils/api";
 import Image from "next/image";
-import { LoadingPage } from "~/components/loading";
+import { LoadingFeed } from "~/components/loading";
 import { PostView } from "~/components/postview";
 import { PageLayout } from "~/components/layout";
 
@@ -17,7 +17,7 @@ const ProfileFeed = (props: { authorId: string }) => {
     authorId: props.authorId,
   });
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading) return <LoadingFeed />;
 
   if (!data || data.length === 0)
     return <div>User hasn&apos;t posted yet.</div>;
@@ -80,7 +80,7 @@ const ProfilePage: NextPage<ProfilePageProps> = (props) => {
             alt={`${username}'s Profile Image`}
             width={160}
             height={160}
-            className="absolute bottom-0 left-0 -mb-20 ml-4 rounded-full border-[5px] border-black bg-black"
+            className="absolute bottom-0 left-0 -mb-20 ml-4 h-40 w-40 overflow-hidden rounded-full border-[5px] border-black bg-black"
           />
         </div>
         <div className="h-20"></div>
