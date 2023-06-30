@@ -19,9 +19,9 @@ import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { inputSchema, type inputSchemaType } from "~/utils/validation";
 
-
 //TODO: You might also want to sync your database with clerk
 //TODO: Add OG image support
+//TODO: check all void operators
 
 const CreatePostWizard = () => {
   const { user } = useUser();
@@ -87,6 +87,7 @@ const CreatePostWizard = () => {
         >
           <div className="flex grow flex-col overflow-clip">
             <input
+              type="text"
               className="mt-3 rounded-full bg-transparent px-1 outline-none"
               id="content"
               placeholder="Type some emojis!"
