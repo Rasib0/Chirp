@@ -279,7 +279,9 @@ const Home: NextPage = () => {
             {isSignedIn && user && user.username && (
               <div className="flex items-center justify-center px-2">
                 <UserButton afterSignOutUrl="/" />
-                <span className="ml-2 font-thin">{`@${user.username}`}</span>
+                <Link href={`/@${user.username}`}>
+                  <span className="ml-2 font-thin">{`@${user.username}`}</span>
+                </Link>
               </div>
             )}
             {!isSignedIn && (
