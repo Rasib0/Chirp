@@ -77,6 +77,7 @@ const CreatePostWizard = () => {
           />
         </Link>
         <form
+          autoComplete="off"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(onSubmit)().catch((err) => {
@@ -154,7 +155,6 @@ const useScrollPosition = (
 
 const Feed = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
 
   const {
     data,
@@ -164,7 +164,7 @@ const Feed = () => {
     isFetching,
   } = api.posts.getBatch.useInfiniteQuery(
     {
-      limit: 10,
+      limit: 20,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -178,18 +178,16 @@ const Feed = () => {
   );
 
   useEffect(() => {
-    if (scrollPositionOutput > 90 && hasNextPage && !isFetching && !isLocked) {
-      setIsLocked(true);
-      setScrollPosition(0);
-      fetchNextPage()
-        .then(() => {
-          setIsLocked(false);
-        })
-        .catch((err) => {
-          console.log(err);
+    if (scrollPositionOutput > 85 && hasNextPage && !isFetching) {
+      const timer = setTimeout(() => {
+        fetchNextPage().catch((err: Error) => {
+          console.error(err);
         });
+      });
+
+      return () => clearTimeout(timer);
     }
-  }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching, isLocked]);
+  }, [scrollPositionOutput, fetchNextPage, hasNextPage, isFetching]);
 
   if (postLoading) return <LoadingFeed />;
 
@@ -216,27 +214,7 @@ const Feed = () => {
         </div>
       ) : (
         <div className="flex justify-center p-4">
-          {isFetching ? (
-            <LoadingSpinner size={30} />
-          ) : (
-            <p>
-              Not seeing older tweets?{" "}
-              <button
-                className="font-semibold text-blue-500"
-                onClick={() => {
-                  fetchNextPage()
-                    .then(() => {
-                      setIsLocked(false);
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                    });
-                }}
-              >
-                Load more
-              </button>
-            </p>
-          )}
+          {isFetching && <LoadingSpinner size={30} />}
         </div>
       )}
     </article>
@@ -249,14 +227,14 @@ const Home: NextPage = () => {
   // Start fetching asap (caching)
   api.posts.getBatch.useInfiniteQuery(
     {
-      limit: 10,
+      limit: 20,
     },
     {
-      onSuccess: (data) => {
-        console.log(
-          "onSuccess: ",
-          data.pages[0]?.postsWithUserData[0]?.post.content
-        );
+      onSuccess: (_data) => {
+        // console.log(
+        //   "onSuccess: ",
+        //   data.pages[0]?.postsWithUserData[0]?.post.content
+        // );
       },
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
