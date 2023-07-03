@@ -209,7 +209,7 @@ const Feed = () => {
       {!hasNextPage ? (
         <div className="flex justify-center">
           <p className="p-4 font-semibold text-blue-500">
-            No more tweets to load
+            You have reached the end!
           </p>
         </div>
       ) : (
